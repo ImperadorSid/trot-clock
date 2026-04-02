@@ -14,13 +14,15 @@ import com.imperadorsid.runningtracker.presentation.MainActivity
 
 class OngoingActivityManager(private val context: Context) {
 
-    fun create(notificationId: Int, notificationBuilder: NotificationCompat.Builder) {
+    private val tapPending: PendingIntent by lazy {
         val tapIntent = Intent(context, MainActivity::class.java)
-        val tapPending = PendingIntent.getActivity(
+        PendingIntent.getActivity(
             context, 0, tapIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+    }
 
+    fun create(notificationId: Int, notificationBuilder: NotificationCompat.Builder) {
         val ongoingActivity = OngoingActivity.Builder(context, notificationId, notificationBuilder)
             .setStaticIcon(R.mipmap.ic_launcher)
             .setTouchIntent(tapPending)
@@ -48,6 +50,7 @@ class OngoingActivityManager(private val context: Context) {
             notificationBuilder
         )
             .setStaticIcon(R.mipmap.ic_launcher)
+            .setTouchIntent(tapPending)
             .setStatus(
                 Status.Builder()
                     .addTemplate(phaseLabel)
