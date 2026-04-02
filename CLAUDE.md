@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Standalone Wear OS running tracker app built with Jetpack Compose for Wear OS and Material 3. Single-module project targeting API 30+ (Android 11+).
+TrotClock — standalone Wear OS walk/jog interval timer built with Jetpack Compose for Wear OS and Material 3. Single-module project targeting API 30+ (Android 11+).
 
 ## Build Commands
 
@@ -19,7 +19,7 @@ Standalone Wear OS running tracker app built with Jetpack Compose for Wear OS an
 ## Architecture
 
 - **Pattern**: MVVM + Clean Architecture (single-module)
-- **Package**: `com.imperadorsid.runningtracker`
+- **Package**: `com.imperadorsid.runningtracker` (legacy name, app display name is TrotClock)
 
 ### Layer Overview
 
