@@ -30,15 +30,15 @@ class RunTrackingService : LifecycleService() {
             get() = timer.intervalTransition
 
         private val timer = SessionTimer()
+        private var repository: SessionRepository? = null
+
+        fun setRepository(repository: SessionRepository) {
+            this.repository = repository
+        }
     }
 
     private lateinit var notificationHelper: NotificationHelper
     private lateinit var ongoingActivityManager: OngoingActivityManager
-    private var repository: SessionRepository? = null
-
-    fun setRepository(repository: SessionRepository) {
-        this.repository = repository
-    }
 
     private var lastNotificationStep: Int? = null
     private var lastNotificationPaused: Boolean? = null
