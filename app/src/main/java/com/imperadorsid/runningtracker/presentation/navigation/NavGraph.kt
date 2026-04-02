@@ -71,10 +71,11 @@ fun RunningTrackerNavGraph(container: AppContainer) {
             ActiveSessionScreen(
                 uiState = uiState,
                 intervalTransition = RunTrackingService.intervalTransition,
-                onStart = { id ->
+                onStart = { id, intervalsOnly ->
                     val intent = Intent(context, RunTrackingService::class.java).apply {
                         action = RunTrackingService.ACTION_START
                         putExtra(RunTrackingService.EXTRA_SESSION_ID, id)
+                        putExtra(RunTrackingService.EXTRA_INTERVALS_ONLY, intervalsOnly)
                     }
                     context.startForegroundService(intent)
                 },

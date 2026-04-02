@@ -69,4 +69,24 @@ class TimerStepTest {
         assertEquals(TimerPhase.WARMUP, steps[0].phase)
         assertEquals(TimerPhase.COOLDOWN, steps[1].phase)
     }
+
+    @Test
+    fun `buildTimerSteps with intervalsOnly omits warmup and cooldown`() {
+        val patterns = listOf(
+            IntervalPattern(reps = 2, walkDurationSeconds = 60, jogDurationSeconds = 90)
+        )
+        val steps = buildTimerSteps(patterns, intervalsOnly = true)
+        // walk, jog, walk, jog (no warmup, no cooldown)
+        assertEquals(4, steps.size)
+        assertEquals(TimerStep(60, IntervalType.WALK, TimerPhase.ACTIVE), steps[0])
+        assertEquals(TimerStep(90, IntervalType.JOG, TimerPhase.ACTIVE), steps[1])
+        assertEquals(TimerStep(60, IntervalType.WALK, TimerPhase.ACTIVE), steps[2])
+        assertEquals(TimerStep(90, IntervalType.JOG, TimerPhase.ACTIVE), steps[3])
+    }
+
+    @Test
+    fun `buildTimerSteps with intervalsOnly and no patterns is empty`() {
+        val steps = buildTimerSteps(emptyList(), intervalsOnly = true)
+        assertEquals(0, steps.size)
+    }
 }

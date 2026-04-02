@@ -22,6 +22,7 @@ class RunTrackingService : LifecycleService() {
         const val ACTION_RESUME = "com.imperadorsid.runningtracker.ACTION_RESUME"
         const val ACTION_STOP = "com.imperadorsid.runningtracker.ACTION_STOP"
         const val EXTRA_SESSION_ID = "session_id"
+        const val EXTRA_INTERVALS_ONLY = "intervals_only"
 
         private val _timerState = MutableStateFlow<TimerState>(TimerState.Idle)
         val timerState: StateFlow<TimerState> = _timerState
@@ -89,8 +90,9 @@ class RunTrackingService : LifecycleService() {
         when (intent?.action) {
             ACTION_START -> {
                 val sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
+                val intervalsOnly = intent.getBooleanExtra(EXTRA_INTERVALS_ONLY, false)
                 if (sessionId != -1L) {
-                    startSession(sessionId)
+                    startSession(sessionId, intervalsOnly)
                 }
             }
             ACTION_PAUSE -> timer.pause()
@@ -104,12 +106,12 @@ class RunTrackingService : LifecycleService() {
         return START_NOT_STICKY
     }
 
-    private fun startSession(sessionId: Long) {
+    private fun startSession(sessionId: Long, intervalsOnly: Boolean = false) {
         val repo = repository ?: return
 
         lifecycleScope.launch {
             val session = repo.getSessionById(sessionId) ?: return@launch
-            val steps = buildTimerSteps(session.patterns)
+            val steps = buildTimerSteps(session.patterns, intervalsOnly)
 
             val builder = notificationHelper.buildNotificationBuilder("Starting...", isPaused = false)
             startForeground(NotificationHelper.NOTIFICATION_ID, builder.build())

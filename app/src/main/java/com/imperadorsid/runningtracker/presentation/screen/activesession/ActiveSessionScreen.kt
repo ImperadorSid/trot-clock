@@ -16,6 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,7 +44,7 @@ import kotlinx.coroutines.flow.emptyFlow
 fun ActiveSessionScreen(
     uiState: ActiveSessionUiState,
     intervalTransition: Flow<IntervalType> = emptyFlow(),
-    onStart: (Long) -> Unit,
+    onStart: (Long, Boolean) -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
@@ -61,7 +65,7 @@ fun ActiveSessionScreen(
             ReadyContent(
                 state = uiState,
                 intervalTransition = intervalTransition,
-                onStart = { onStart(uiState.session.id) },
+                onStart = { intervalsOnly -> onStart(uiState.session.id, intervalsOnly) },
                 onPause = onPause,
                 onResume = onResume,
                 onStop = onStop,
@@ -75,7 +79,7 @@ fun ActiveSessionScreen(
 private fun ReadyContent(
     state: ActiveSessionUiState.Ready,
     intervalTransition: Flow<IntervalType>,
-    onStart: () -> Unit,
+    onStart: (Boolean) -> Unit,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit,
@@ -106,8 +110,10 @@ private fun ReadyContent(
 @Composable
 private fun IdleContent(
     state: ActiveSessionUiState.Ready,
-    onStart: () -> Unit
+    onStart: (Boolean) -> Unit
 ) {
+    var intervalsOnly by remember { mutableStateOf(false) }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -122,9 +128,16 @@ private fun IdleContent(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(4.dp))
+        FilledTonalButton(
+            onClick = { intervalsOnly = !intervalsOnly },
+            label = {
+                Text(if (intervalsOnly) "Intervals only" else "Full session")
+            }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
         Button(
-            onClick = onStart,
+            onClick = { onStart(intervalsOnly) },
             label = { Text("Start") }
         )
     }

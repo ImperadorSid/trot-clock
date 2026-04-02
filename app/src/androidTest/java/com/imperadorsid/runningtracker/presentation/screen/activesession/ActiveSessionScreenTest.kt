@@ -32,7 +32,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, TimerState.Idle),
-                    onStart = {}, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -47,7 +47,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, TimerState.Idle),
-                    onStart = { startedId = it }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { id, _ -> startedId = id }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -67,7 +67,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
-                    onStart = {}, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -87,7 +87,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
-                    onStart = {}, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -107,7 +107,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
-                    onStart = {}, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -127,7 +127,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
-                    onStart = {}, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -148,7 +148,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
-                    onStart = {}, onPause = { pauseCalled = true }, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = { pauseCalled = true }, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -169,7 +169,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
-                    onStart = {}, onPause = {}, onResume = {}, onStop = { stopCalled = true }, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = { stopCalled = true }, onBack = {}
                 )
             }
         }
@@ -183,7 +183,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, TimerState.Completed),
-                    onStart = {}, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }
@@ -197,7 +197,7 @@ class ActiveSessionScreenTest {
             RunningTrackerTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Error,
-                    onStart = {}, onPause = {}, onResume = {}, onStop = {}, onBack = {}
+                    onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
                 )
             }
         }

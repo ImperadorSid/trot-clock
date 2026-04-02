@@ -12,10 +12,12 @@ data class TimerStep(
     val phase: TimerPhase
 )
 
-fun buildTimerSteps(patterns: List<IntervalPattern>): List<TimerStep> {
+fun buildTimerSteps(patterns: List<IntervalPattern>, intervalsOnly: Boolean = false): List<TimerStep> {
     val steps = mutableListOf<TimerStep>()
 
-    steps.add(TimerStep(Session.WARMUP_SECONDS, IntervalType.WALK, TimerPhase.WARMUP))
+    if (!intervalsOnly) {
+        steps.add(TimerStep(Session.WARMUP_SECONDS, IntervalType.WALK, TimerPhase.WARMUP))
+    }
 
     for (pattern in patterns) {
         repeat(pattern.reps) {
@@ -24,7 +26,9 @@ fun buildTimerSteps(patterns: List<IntervalPattern>): List<TimerStep> {
         }
     }
 
-    steps.add(TimerStep(Session.COOLDOWN_SECONDS, IntervalType.WALK, TimerPhase.COOLDOWN))
+    if (!intervalsOnly) {
+        steps.add(TimerStep(Session.COOLDOWN_SECONDS, IntervalType.WALK, TimerPhase.COOLDOWN))
+    }
 
     return steps
 }
