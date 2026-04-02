@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Running Tracker</string>
     <string name="hello_world">Hello, %1$s!</string>
+    <string name="notification_channel_name">Run Tracking</string>
+    <string name="notification_channel_description">Shows progress during active running sessions</string>
+    <string name="pause">Pause</string>
+    <string name="resume">Resume</string>
+    <string name="stop">Stop</string>
 </resources>
