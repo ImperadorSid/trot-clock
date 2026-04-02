@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Running Tracker</string>
+    <string name="app_name">TrotClock</string>
     <string name="hello_world">Hello, %1$s!</string>
     <string name="notification_channel_name">Run Tracking</string>
     <string name="notification_channel_description">Shows progress during active running sessions</string>

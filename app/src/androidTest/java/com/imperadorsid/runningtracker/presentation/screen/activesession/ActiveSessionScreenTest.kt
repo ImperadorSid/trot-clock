@@ -10,7 +10,7 @@ import com.imperadorsid.runningtracker.domain.model.Session
 import com.imperadorsid.runningtracker.domain.model.TimerPhase
 import com.imperadorsid.runningtracker.domain.model.TimerStep
 import com.imperadorsid.runningtracker.domain.timer.TimerState
-import com.imperadorsid.runningtracker.presentation.theme.RunningTrackerTheme
+import com.imperadorsid.runningtracker.presentation.theme.TrotClockTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -29,7 +29,7 @@ class ActiveSessionScreenTest {
     @Test
     fun idleStateShowsSessionInfoAndStartButton() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, TimerState.Idle),
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
@@ -44,7 +44,7 @@ class ActiveSessionScreenTest {
     fun startButtonCallsOnStart() {
         var startedId = -1L
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, TimerState.Idle),
                     onStart = { id, _ -> startedId = id }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
@@ -64,7 +64,7 @@ class ActiveSessionScreenTest {
             totalRemainingSeconds = 345
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
@@ -84,7 +84,7 @@ class ActiveSessionScreenTest {
             totalRemainingSeconds = 200
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
@@ -104,7 +104,7 @@ class ActiveSessionScreenTest {
             totalRemainingSeconds = 900
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
@@ -124,7 +124,7 @@ class ActiveSessionScreenTest {
             isPaused = true
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
@@ -145,7 +145,7 @@ class ActiveSessionScreenTest {
             totalRemainingSeconds = 200
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
                     onStart = { _, _ -> }, onPause = { pauseCalled = true }, onResume = {}, onStop = {}, onBack = {}
@@ -166,7 +166,7 @@ class ActiveSessionScreenTest {
             totalRemainingSeconds = 200
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, timerState),
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = { stopCalled = true }, onBack = {}
@@ -180,7 +180,7 @@ class ActiveSessionScreenTest {
     @Test
     fun completedStateShowsDoneAndBackButton() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Ready(testSession, TimerState.Completed),
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}
@@ -194,7 +194,7 @@ class ActiveSessionScreenTest {
     @Test
     fun errorStateShowsMessage() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 ActiveSessionScreen(
                     uiState = ActiveSessionUiState.Error,
                     onStart = { _, _ -> }, onPause = {}, onResume = {}, onStop = {}, onBack = {}

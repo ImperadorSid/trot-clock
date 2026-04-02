@@ -27,7 +27,7 @@ private val DefaultRunningColors = RunningColors(
 )
 
 @Composable
-fun RunningTrackerTheme(
+fun TrotClockTheme(
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(LocalRunningColors provides DefaultRunningColors) {

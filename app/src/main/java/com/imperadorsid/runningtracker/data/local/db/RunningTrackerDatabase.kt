@@ -7,6 +7,6 @@ import androidx.room.RoomDatabase
     entities = [SessionEntity::class, IntervalPatternEntity::class],
     version = 1
 )
-abstract class RunningTrackerDatabase : RoomDatabase() {
+abstract class TrotClockDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
 }

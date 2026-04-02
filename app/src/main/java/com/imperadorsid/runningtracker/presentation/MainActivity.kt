@@ -5,8 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.wear.compose.material3.AppScaffold
 import com.imperadorsid.runningtracker.di.AppContainer
-import com.imperadorsid.runningtracker.presentation.navigation.RunningTrackerNavGraph
-import com.imperadorsid.runningtracker.presentation.theme.RunningTrackerTheme
+import com.imperadorsid.runningtracker.presentation.navigation.TrotClockNavGraph
+import com.imperadorsid.runningtracker.presentation.theme.TrotClockTheme
 import com.imperadorsid.runningtracker.service.RunTrackingService
 
 class MainActivity : ComponentActivity() {
@@ -19,9 +19,9 @@ class MainActivity : ComponentActivity() {
         RunTrackingService.setRepository(container.sessionRepository)
 
         setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 AppScaffold {
-                    RunningTrackerNavGraph(container)
+                    TrotClockNavGraph(container)
                 }
             }
         }

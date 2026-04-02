@@ -15,14 +15,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SessionDaoTest {
 
-    private lateinit var database: RunningTrackerDatabase
+    private lateinit var database: TrotClockDatabase
     private lateinit var dao: SessionDao
 
     @Before
     fun setup() {
         database = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
-            RunningTrackerDatabase::class.java
+            TrotClockDatabase::class.java
         ).allowMainThreadQueries().build()
         dao = database.sessionDao()
     }

@@ -3,7 +3,7 @@ package com.imperadorsid.runningtracker.presentation.screen.createsession
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.imperadorsid.runningtracker.presentation.theme.RunningTrackerTheme
+import com.imperadorsid.runningtracker.presentation.theme.TrotClockTheme
 import org.junit.Rule
 import org.junit.Test
 
@@ -15,7 +15,7 @@ class CreateSessionScreenTest {
     @Test
     fun showsNewSessionHeader() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 CreateSessionScreen(
                     uiState = CreateSessionUiState(),
                     onAddPattern = { _, _, _ -> },
@@ -31,7 +31,7 @@ class CreateSessionScreenTest {
     @Test
     fun showsWalkAndJogLabels() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 CreateSessionScreen(
                     uiState = CreateSessionUiState(),
                     onAddPattern = { _, _, _ -> },
@@ -48,7 +48,7 @@ class CreateSessionScreenTest {
     @Test
     fun showsSaveEdgeButton() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 CreateSessionScreen(
                     uiState = CreateSessionUiState(),
                     onAddPattern = { _, _, _ -> },
@@ -64,7 +64,7 @@ class CreateSessionScreenTest {
     @Test
     fun showsSavingState() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 CreateSessionScreen(
                     uiState = CreateSessionUiState(isSaving = true),
                     onAddPattern = { _, _, _ -> },

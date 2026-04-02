@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Running Tracker"
+rootProject.name = "TrotClock"
 include(":app")

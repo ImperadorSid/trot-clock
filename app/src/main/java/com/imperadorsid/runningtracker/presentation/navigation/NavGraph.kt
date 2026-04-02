@@ -21,7 +21,7 @@ import com.imperadorsid.runningtracker.presentation.screen.sessionlist.SessionLi
 import com.imperadorsid.runningtracker.service.RunTrackingService
 
 @Composable
-fun RunningTrackerNavGraph(container: AppContainer) {
+fun TrotClockNavGraph(container: AppContainer) {
     val navController = rememberSwipeDismissableNavController()
 
     SwipeDismissableNavHost(

@@ -6,7 +6,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.imperadorsid.runningtracker.domain.model.IntervalPattern
 import com.imperadorsid.runningtracker.domain.model.Session
-import com.imperadorsid.runningtracker.presentation.theme.RunningTrackerTheme
+import com.imperadorsid.runningtracker.presentation.theme.TrotClockTheme
 import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -19,7 +19,7 @@ class SessionListScreenTest {
     @Test
     fun showsLoadingIndicator() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 SessionListScreen(
                     uiState = SessionListUiState.Loading,
                     onCreateSession = {},
@@ -35,7 +35,7 @@ class SessionListScreenTest {
     @Test
     fun showsEmptyStateWhenNoSessions() {
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 SessionListScreen(
                     uiState = SessionListUiState.Success(emptyList()),
                     onCreateSession = {},
@@ -57,7 +57,7 @@ class SessionListScreenTest {
             )
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 SessionListScreen(
                     uiState = SessionListUiState.Success(sessions),
                     onCreateSession = {},
@@ -80,7 +80,7 @@ class SessionListScreenTest {
             )
         )
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 SessionListScreen(
                     uiState = SessionListUiState.Success(sessions),
                     onCreateSession = {},
@@ -97,7 +97,7 @@ class SessionListScreenTest {
     fun newButtonCallsOnCreateSession() {
         var createCalled = false
         composeRule.setContent {
-            RunningTrackerTheme {
+            TrotClockTheme {
                 SessionListScreen(
                     uiState = SessionListUiState.Success(emptyList()),
                     onCreateSession = { createCalled = true },
