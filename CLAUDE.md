@@ -28,7 +28,7 @@ UI Layer (presentation/)
   Compose Screens ← ViewModels ← UiState sealed classes
        │
 Service Layer (service/)
-  RunTrackingService (foreground) — owns SessionTimer, exposes StateFlow
+  RunTrackingService (foreground) → SessionManager (owns SessionTimer, exposes StateFlow)
        │
 Domain Layer (domain/)
   Models (Session, IntervalPattern, TimerStep) + SessionTimer + Repository interfaces
@@ -44,8 +44,7 @@ com.imperadorsid.runningtracker/
 ├── data/
 │   ├── repository/          # Repository implementations
 │   └── local/
-│       ├── db/              # Room database, DAOs, entities
-│       └── datastore/       # DataStore preferences
+│       └── db/              # Room database, DAOs, entities
 ├── domain/
 │   ├── model/               # Domain models (Session, IntervalPattern, TimerStep, IntervalType, TimerPhase)
 │   ├── timer/               # SessionTimer + TimerState sealed class
@@ -100,14 +99,14 @@ State flows: `RunTrackingService.timerState` (static `StateFlow<TimerState>`) an
 app/src/
 ├── test/                    # Unit tests (JVM, no device)
 │   └── java/.../
-│       ├── presentation/    # ViewModel state transitions
-│       ├── domain/          # Use cases, pace/distance calculations
-│       └── data/            # Repository logic, mappers
+│       ├── presentation/    # ViewModel state transitions, formatting
+│       ├── domain/          # Models, timer logic, state tests
+│       ├── data/            # Repository logic, mappers
+│       └── service/         # SessionManager action handling
 ├── androidTest/             # Instrumented tests (Wear emulator)
 │   └── java/.../
 │       ├── presentation/    # Compose UI on round/square screens
-│       ├── data/local/      # Room DAO with in-memory DB
-│       └── service/         # Service binding
+│       └── data/local/      # Room DAO with in-memory DB
 └── testFixtures/            # Shared fakes for both test/ and androidTest/
     └── java/.../fake/
 ```
@@ -118,7 +117,6 @@ app/src/
 |---------|---------|
 | `kotlinx-coroutines-test` | `runTest`, `TestDispatcher` for coroutine-based logic |
 | `turbine` | Assert `Flow` emissions in sequence |
-| `mockk` | Mock dependencies where fakes are impractical |
 | `compose-ui-test-junit4` | `ComposeTestRule`, `onNodeWithText`, `performClick` |
 | `room-testing` | In-memory Room DB for DAO tests |
 
