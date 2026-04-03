@@ -5,12 +5,9 @@ import android.content.Intent
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.imperadorsid.runningtracker.domain.model.IntervalType
-import com.imperadorsid.runningtracker.domain.model.buildTimerSteps
 import com.imperadorsid.runningtracker.domain.repository.SessionRepository
-import com.imperadorsid.runningtracker.domain.timer.SessionTimer
 import com.imperadorsid.runningtracker.domain.timer.TimerState
 import com.imperadorsid.runningtracker.presentation.util.formatPhaseLabel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,24 +15,21 @@ import kotlinx.coroutines.launch
 class RunTrackingService : LifecycleService() {
 
     companion object {
-        const val ACTION_START = "com.imperadorsid.runningtracker.ACTION_START"
-        const val ACTION_PAUSE = "com.imperadorsid.runningtracker.ACTION_PAUSE"
-        const val ACTION_RESUME = "com.imperadorsid.runningtracker.ACTION_RESUME"
-        const val ACTION_STOP = "com.imperadorsid.runningtracker.ACTION_STOP"
+        const val ACTION_START = SessionManager.ACTION_START
+        const val ACTION_PAUSE = SessionManager.ACTION_PAUSE
+        const val ACTION_RESUME = SessionManager.ACTION_RESUME
+        const val ACTION_STOP = SessionManager.ACTION_STOP
         const val EXTRA_SESSION_ID = "session_id"
         const val EXTRA_INTERVALS_ONLY = "intervals_only"
 
-        private val _timerState = MutableStateFlow<TimerState>(TimerState.Idle)
-        val timerState: StateFlow<TimerState> = _timerState
+        private val manager = SessionManager()
 
-        val intervalTransition: SharedFlow<IntervalType>
-            get() = timer.intervalTransition
+        val timerState: StateFlow<TimerState> = manager.timerState
 
-        private val timer = SessionTimer()
-        private var repository: SessionRepository? = null
+        val intervalTransition: SharedFlow<IntervalType> = manager.intervalTransition
 
         fun setRepository(repository: SessionRepository) {
-            this.repository = repository
+            manager.setRepository(repository)
         }
     }
 
@@ -52,19 +46,16 @@ class RunTrackingService : LifecycleService() {
         notificationHelper.createChannel()
 
         lifecycleScope.launch {
-            timer.timerState.collect { state ->
-                _timerState.value = state
+            manager.timerState.collect { state ->
                 when (state) {
                     is TimerState.Running -> {
-                        val stepChanged = state.currentStepIndex != lastNotificationStep
-                        val pauseChanged = state.isPaused != lastNotificationPaused
-                        if (stepChanged || pauseChanged) {
+                        if (manager.shouldUpdateNotification(state, lastNotificationStep, lastNotificationPaused)) {
                             lastNotificationStep = state.currentStepIndex
                             lastNotificationPaused = state.isPaused
                             val text = formatPhaseLabel(state)
                             val builder = notificationHelper.buildNotificationBuilder(text, state.isPaused)
-                            val manager = getSystemService(NotificationManager::class.java)
-                            manager.notify(NotificationHelper.NOTIFICATION_ID, builder.build())
+                            val notificationManager = getSystemService(NotificationManager::class.java)
+                            notificationManager.notify(NotificationHelper.NOTIFICATION_ID, builder.build())
                             ongoingActivityManager.update(state, builder)
                         }
                     }
@@ -80,18 +71,20 @@ class RunTrackingService : LifecycleService() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
 
-        when (intent?.action) {
-            ACTION_START -> {
-                val sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
-                val intervalsOnly = intent.getBooleanExtra(EXTRA_INTERVALS_ONLY, false)
-                if (sessionId != -1L) {
-                    startSession(sessionId, intervalsOnly)
-                }
+        val action = intent?.action
+        if (action != null) {
+            val sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
+            val intervalsOnly = intent.getBooleanExtra(EXTRA_INTERVALS_ONLY, false)
+
+            if (action == ACTION_START && sessionId != -1L) {
+                val builder = notificationHelper.buildNotificationBuilder("Starting...", isPaused = false)
+                startForeground(NotificationHelper.NOTIFICATION_ID, builder.build())
+                ongoingActivityManager.create(NotificationHelper.NOTIFICATION_ID, builder)
             }
-            ACTION_PAUSE -> timer.pause()
-            ACTION_RESUME -> timer.resume()
-            ACTION_STOP -> {
-                timer.stop()
+
+            manager.handleAction(action, sessionId, intervalsOnly, lifecycleScope)
+
+            if (action == ACTION_STOP) {
                 stopSelf()
             }
         }
@@ -99,23 +92,8 @@ class RunTrackingService : LifecycleService() {
         return START_NOT_STICKY
     }
 
-    private fun startSession(sessionId: Long, intervalsOnly: Boolean = false) {
-        val repo = repository ?: return
-
-        lifecycleScope.launch {
-            val session = repo.getSessionById(sessionId) ?: return@launch
-            val steps = buildTimerSteps(session.patterns, intervalsOnly)
-
-            val builder = notificationHelper.buildNotificationBuilder("Starting...", isPaused = false)
-            startForeground(NotificationHelper.NOTIFICATION_ID, builder.build())
-            ongoingActivityManager.create(NotificationHelper.NOTIFICATION_ID, builder)
-
-            timer.start(steps, lifecycleScope)
-        }
-    }
-
     override fun onDestroy() {
-        timer.stop()
+        manager.stop()
         super.onDestroy()
     }
 }

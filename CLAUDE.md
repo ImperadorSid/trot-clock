@@ -58,7 +58,8 @@ com.imperadorsid.runningtracker/
 │   ├── util/                # DurationFormat utility
 │   └── theme/               # Wear Material 3 theme
 ├── service/
-│   ├── RunTrackingService.kt      # Foreground service — owns SessionTimer, dispatches actions
+│   ├── RunTrackingService.kt      # Foreground service — thin lifecycle/notification wrapper
+│   ├── SessionManager.kt         # Testable session logic: action handling, timer orchestration
 │   ├── NotificationHelper.kt      # Notification channel + builder with pause/resume/stop actions
 │   └── OngoingActivityManager.kt  # Ongoing Activity indicator on watch face
 └── di/                      # Dependency injection
@@ -67,6 +68,7 @@ com.imperadorsid.runningtracker/
 ### Key Design Decisions
 
 - **Foreground service owns run state**, not ViewModels — Activity can be destroyed when wrist drops
+- **SessionManager** holds testable business logic; `RunTrackingService` is a thin lifecycle/notification wrapper
 - **UiState sealed classes** per screen (MVI-lite) to prevent impossible states
 - **Ambient mode support** required — reduce updates to 1/min, simplify UI when screen dims
 - **OngoingActivity** keeps the app visible on watch face during active runs
@@ -90,7 +92,7 @@ State flows: `RunTrackingService.timerState` (static `StateFlow<TimerState>`) an
 ### Strategy
 
 - **Prefer fakes over mocks** — manually implement repository interfaces for tests; more readable, catches more bugs, survives refactors
-- **Extract service logic** into a testable manager class; keep `RunTrackingService` as a thin lifecycle/notification wrapper
+- **Service logic lives in `SessionManager`** — a testable class that handles action dispatching, timer orchestration, and session loading; `RunTrackingService` is a thin lifecycle/notification wrapper
 
 ### Test Source Sets
 
@@ -204,6 +206,17 @@ presentation/screen/<feature>/
 - **Don't store state in the Activity or Composables** — State lives in ViewModel (survives config changes) or Service (survives activity destruction)
 - **Don't create new `SessionTimer` instances** — The service owns the single timer instance via companion object
 - **Don't add dependencies without updating `libs.versions.toml`** — All versions go in the version catalog
+- **Don't put logic in `RunTrackingService` directly** — Add it to `SessionManager` so it's testable without Android framework
+
+## Code Conventions
+
+- **Naming**: Kotlin standard — `PascalCase` classes, `camelCase` functions/properties, `UPPER_SNAKE_CASE` constants
+- **File organization**: One public class per file; co-locate UiState + ViewModel + Screen per feature
+- **Composable functions**: Capitalize names (`@Composable fun ActiveSessionScreen`), hoist state, accept lambdas for events
+- **ViewModel factories**: Use `companion object { fun factory(...): ViewModelProvider.Factory }` pattern
+- **Sealed classes**: Use for UiState (Loading/Ready/Error variants) and navigation routes
+- **Flow collection**: Use `collectAsState()` in Composables, `stateIn()` with `WhileSubscribed(5000)` in ViewModels
+- **Test names**: Use backtick syntax with descriptive sentences (`fun \`initial state is Loading\`()`)
 
 ## Error Handling Patterns
 
