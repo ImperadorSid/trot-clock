@@ -28,10 +28,13 @@ UI Layer (presentation/)
   Compose Screens ← ViewModels ← UiState sealed classes
        │
 Service Layer (service/)
-  RunTrackingService (foreground) — owns exercise state, exposes StateFlow
+  RunTrackingService (foreground) — owns SessionTimer, exposes StateFlow
+       │
+Domain Layer (domain/)
+  Models (Session, IntervalPattern, TimerStep) + SessionTimer + Repository interfaces
        │
 Data Layer (data/)
-  Repositories → Room DB (run history) / DataStore (preferences)
+  Repositories → Room DB (session history)
 ```
 
 ### Package Structure
@@ -44,16 +47,19 @@ com.imperadorsid.runningtracker/
 │       ├── db/              # Room database, DAOs, entities
 │       └── datastore/       # DataStore preferences
 ├── domain/
-│   ├── model/               # Domain models (Run, RunStats, LocationPoint)
-│   └── repository/          # Repository interfaces
+│   ├── model/               # Domain models (Session, IntervalPattern, TimerStep, IntervalType, TimerPhase)
+│   ├── timer/               # SessionTimer + TimerState sealed class
+│   ├── repository/          # Repository interfaces
+│   └── util/                # Clock abstraction
 ├── presentation/
 │   ├── MainActivity.kt      # Entry point (ComponentActivity + setContent)
 │   ├── navigation/          # Wear NavGraph (SwipeDismissableNavHost)
-│   ├── screen/              # Feature screens with co-located ViewModels
-│   ├── component/           # Reusable composables
+│   ├── screen/              # Feature screens with co-located ViewModels + UiState
+│   ├── util/                # DurationFormat utility
 │   └── theme/               # Wear Material 3 theme
 ├── service/
-│   ├── RunTrackingService.kt      # Foreground service — source of truth for run state
+│   ├── RunTrackingService.kt      # Foreground service — owns SessionTimer, dispatches actions
+│   ├── NotificationHelper.kt      # Notification channel + builder with pause/resume/stop actions
 │   └── OngoingActivityManager.kt  # Ongoing Activity indicator on watch face
 └── di/                      # Dependency injection
 ```
@@ -65,6 +71,19 @@ com.imperadorsid.runningtracker/
 - **Ambient mode support** required — reduce updates to 1/min, simplify UI when screen dims
 - **OngoingActivity** keeps the app visible on watch face during active runs
 - **Swipe-to-dismiss** with confirmation dialog on tracking screen to prevent accidental run loss
+
+### Service Actions
+
+`RunTrackingService` responds to intent actions:
+
+| Action | Extra | Behavior |
+|--------|-------|----------|
+| `ACTION_START` | `EXTRA_SESSION_ID` (Long), `EXTRA_INTERVALS_ONLY` (Boolean) | Load session from repo, build timer steps, start foreground |
+| `ACTION_PAUSE` | — | Pause the `SessionTimer` |
+| `ACTION_RESUME` | — | Resume the `SessionTimer` |
+| `ACTION_STOP` | — | Stop timer, call `stopSelf()` |
+
+State flows: `RunTrackingService.timerState` (static `StateFlow<TimerState>`) and `RunTrackingService.intervalTransition` (static `SharedFlow<IntervalType>`).
 
 ## Testing
 
@@ -108,7 +127,9 @@ app/src/
 ./gradlew connectedAndroidTest     # Instrumented tests (needs Wear emulator)
 ```
 
-## CI (GitHub Actions)
+## CI (GitHub Actions) — Planned
+
+> **Note**: CI is not yet implemented. The configuration below is the target design for when GitHub Actions workflows are added.
 
 ### Pipeline Structure
 
@@ -148,3 +169,91 @@ push/PR → [unit-tests + lint] ──┐
 - Manifest declares `android.hardware.type.watch` feature
 - Splash screen via `core-splashscreen` library with custom theme in `res/values/styles.xml`
 - Wear-specific Compose previews: `@WearPreviewDevices`, `@WearPreviewFontScales`
+
+## Feature Development Workflow
+
+When adding a new feature, follow this layer order:
+
+1. **Domain model** — Add data classes in `domain/model/`
+2. **Repository interface** — Add methods to `domain/repository/SessionRepository.kt`
+3. **Room entities + mapper** — Add `@Entity` in `data/local/db/`, update `SessionMapper.kt`
+4. **DAO methods** — Add `@Query`/`@Insert`/`@Delete` to `SessionDao.kt`
+5. **Repository implementation** — Implement new methods in `data/repository/SessionRepositoryImpl.kt`
+6. **Update test fakes** — Update `FakeSessionRepository` and `FakeSessionDao` in `testFixtures/`
+7. **ViewModel** — Create in `presentation/screen/<feature>/` with sealed `UiState`
+8. **Screen composable** — Create in same package, collect ViewModel state with `collectAsState()`
+9. **Navigation** — Add route to `Screen.kt` and destination to `NavGraph.kt`
+10. **Tests** — Unit test the ViewModel, instrumented test the screen, add domain model tests
+
+### Adding a New Screen
+
+```
+presentation/screen/<feature>/
+├── <Feature>Screen.kt          # @Composable with ScreenScaffold
+├── <Feature>ViewModel.kt       # ViewModelProvider.Factory in companion
+└── <Feature>UiState.kt         # sealed class with Loading/Ready/Error variants
+```
+
+## Anti-patterns
+
+- **Don't put business logic in `@Composable` functions** — Move it to ViewModel or domain layer
+- **Don't use `GlobalScope`** — Use `viewModelScope` in ViewModels, `lifecycleScope` in services
+- **Don't skip sealed UiState classes** — Every screen must have a sealed class preventing impossible states
+- **Don't use mocks when a fake exists** — Check `testFixtures/` first; only mock for Android framework classes
+- **Don't call suspend functions from `@Composable` without `LaunchedEffect`** — Side effects need proper scoping
+- **Don't store state in the Activity or Composables** — State lives in ViewModel (survives config changes) or Service (survives activity destruction)
+- **Don't create new `SessionTimer` instances** — The service owns the single timer instance via companion object
+- **Don't add dependencies without updating `libs.versions.toml`** — All versions go in the version catalog
+
+## Error Handling Patterns
+
+Errors propagate through layers:
+
+```
+Room DAO (throws exception)
+  → Repository (catches, returns null or empty)
+    → ViewModel (maps to UiState.Error or handles gracefully)
+      → Screen (renders error state from sealed class)
+```
+
+- **DAO layer**: Let Room exceptions propagate (suspend functions throw on failure)
+- **Repository layer**: Wrap DAO calls if needed; return `null` for missing entities
+- **ViewModel layer**: Use `UiState.Error` sealed variant; check for null returns from repository
+- **Screen layer**: Render error states from UiState; never catch exceptions in Composables
+- **Service layer**: Use null checks with early return (`repository ?: return`, `session ?: return@launch`)
+
+## Environment Setup
+
+### Prerequisites
+
+- Android Studio (latest stable) with Wear OS module
+- JDK 17+
+- Wear OS emulator (API 30+) or physical Wear OS device
+
+### First-Time Setup
+
+```bash
+# Clone and open in Android Studio
+git clone <repo-url> && cd TrotClock
+
+# Build
+./gradlew assembleDebug
+
+# Create Wear emulator: Tools → Device Manager → Create Device → Wear OS → Large Round → API 30+
+
+# Run on emulator
+./gradlew installDebug
+```
+
+### Release Signing
+
+Create `keystore.properties` in project root (gitignored):
+
+```properties
+storeFile=release.keystore
+storePassword=<your-password>
+keyAlias=<your-alias>
+keyPassword=<your-password>
+```
+
+If `keystore.properties` is missing, the build falls back to debug signing automatically.

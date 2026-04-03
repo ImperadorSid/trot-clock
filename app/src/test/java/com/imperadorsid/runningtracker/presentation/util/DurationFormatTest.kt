@@ -1,5 +1,9 @@
 package com.imperadorsid.runningtracker.presentation.util
 
+import com.imperadorsid.runningtracker.domain.model.IntervalType
+import com.imperadorsid.runningtracker.domain.model.TimerPhase
+import com.imperadorsid.runningtracker.domain.model.TimerStep
+import com.imperadorsid.runningtracker.domain.timer.TimerState
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -38,5 +42,49 @@ class DurationFormatTest {
     @Test
     fun `formatDurationLong with zero`() {
         assertEquals("0m", formatDurationLong(0))
+    }
+
+    @Test
+    fun `formatPhaseLabel warmup returns Warmup`() {
+        val state = TimerState.Running(
+            currentStepIndex = 0,
+            currentStep = TimerStep(600, IntervalType.WALK, TimerPhase.WARMUP),
+            remainingSeconds = 300,
+            totalRemainingSeconds = 900
+        )
+        assertEquals("Warmup", formatPhaseLabel(state))
+    }
+
+    @Test
+    fun `formatPhaseLabel active walk returns WALK`() {
+        val state = TimerState.Running(
+            currentStepIndex = 1,
+            currentStep = TimerStep(60, IntervalType.WALK, TimerPhase.ACTIVE),
+            remainingSeconds = 30,
+            totalRemainingSeconds = 600
+        )
+        assertEquals("WALK", formatPhaseLabel(state))
+    }
+
+    @Test
+    fun `formatPhaseLabel active jog returns JOG`() {
+        val state = TimerState.Running(
+            currentStepIndex = 2,
+            currentStep = TimerStep(90, IntervalType.JOG, TimerPhase.ACTIVE),
+            remainingSeconds = 45,
+            totalRemainingSeconds = 500
+        )
+        assertEquals("JOG", formatPhaseLabel(state))
+    }
+
+    @Test
+    fun `formatPhaseLabel cooldown returns Cooldown`() {
+        val state = TimerState.Running(
+            currentStepIndex = 5,
+            currentStep = TimerStep(300, IntervalType.WALK, TimerPhase.COOLDOWN),
+            remainingSeconds = 150,
+            totalRemainingSeconds = 150
+        )
+        assertEquals("Cooldown", formatPhaseLabel(state))
     }
 }

@@ -83,4 +83,52 @@ class ActiveSessionViewModelTest {
             cancelAndConsumeRemainingEvents()
         }
     }
+
+    @Test
+    fun `Ready state contains correct session data`() = runTest {
+        val patterns = listOf(
+            IntervalPattern(reps = 3, walkDurationSeconds = 60, jogDurationSeconds = 90),
+            IntervalPattern(reps = 2, walkDurationSeconds = 120, jogDurationSeconds = 60)
+        )
+        val id = repository.insertSession(
+            Session(dateLabel = "02/04", patterns = patterns, createdAt = 2000L)
+        )
+        val viewModel = ActiveSessionViewModel(id, repository)
+
+        viewModel.uiState.test {
+            var state = awaitItem()
+            while (state is ActiveSessionUiState.Loading) {
+                state = awaitItem()
+            }
+            assertTrue(state is ActiveSessionUiState.Ready)
+            val ready = state as ActiveSessionUiState.Ready
+            assertEquals("02/04", ready.session.dateLabel)
+            assertEquals(2, ready.session.patterns.size)
+            assertEquals(3, ready.session.patterns[0].reps)
+            assertEquals(2, ready.session.patterns[1].reps)
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Ready state initial timer state is Idle`() = runTest {
+        val id = repository.insertSession(
+            Session(dateLabel = "01/04", patterns = listOf(
+                IntervalPattern(reps = 1, walkDurationSeconds = 60, jogDurationSeconds = 60)
+            ), createdAt = 1000L)
+        )
+        val viewModel = ActiveSessionViewModel(id, repository)
+
+        viewModel.uiState.test {
+            var state = awaitItem()
+            while (state is ActiveSessionUiState.Loading) {
+                state = awaitItem()
+            }
+            val ready = state as ActiveSessionUiState.Ready
+            assertEquals(TimerState.Idle, ready.timerState)
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
 }

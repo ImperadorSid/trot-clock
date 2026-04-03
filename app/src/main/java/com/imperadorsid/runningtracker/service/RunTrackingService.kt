@@ -9,6 +9,7 @@ import com.imperadorsid.runningtracker.domain.model.buildTimerSteps
 import com.imperadorsid.runningtracker.domain.repository.SessionRepository
 import com.imperadorsid.runningtracker.domain.timer.SessionTimer
 import com.imperadorsid.runningtracker.domain.timer.TimerState
+import com.imperadorsid.runningtracker.presentation.util.formatPhaseLabel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -73,14 +74,6 @@ class RunTrackingService : LifecycleService() {
                     is TimerState.Idle -> {}
                 }
             }
-        }
-    }
-
-    private fun formatPhaseLabel(state: TimerState.Running): String {
-        return when (state.currentStep.phase) {
-            com.imperadorsid.runningtracker.domain.model.TimerPhase.WARMUP -> "Warmup"
-            com.imperadorsid.runningtracker.domain.model.TimerPhase.ACTIVE -> state.currentStep.type.name
-            com.imperadorsid.runningtracker.domain.model.TimerPhase.COOLDOWN -> "Cooldown"
         }
     }
 
