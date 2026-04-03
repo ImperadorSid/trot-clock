@@ -87,12 +87,18 @@ class SessionManagerTest {
             awaitItem() // Idle
 
             manager.handleAction(SessionManager.ACTION_START, sessionId, false, this@runTest)
-            advanceUntilIdle()
-            awaitItem() // Running
+            // Only advance enough to start the timer, not complete it
+            advanceTimeBy(1)
+            val running = awaitItem()
+            assertTrue(running is TimerState.Running)
 
             manager.handleAction(SessionManager.ACTION_PAUSE, scope = this@runTest)
-            val paused = awaitItem() as TimerState.Running
-            assertTrue(paused.isPaused)
+            var state = awaitItem()
+            while (state is TimerState.Running && !state.isPaused) {
+                state = awaitItem()
+            }
+            assertTrue(state is TimerState.Running)
+            assertTrue((state as TimerState.Running).isPaused)
 
             manager.stop()
             cancelAndConsumeRemainingEvents()
@@ -107,16 +113,20 @@ class SessionManagerTest {
             awaitItem() // Idle
 
             manager.handleAction(SessionManager.ACTION_START, sessionId, false, this@runTest)
-            advanceUntilIdle()
+            advanceTimeBy(1)
             awaitItem() // Running
 
             manager.handleAction(SessionManager.ACTION_PAUSE, scope = this@runTest)
-            awaitItem() // Paused
+            var state = awaitItem()
+            while (state is TimerState.Running && !state.isPaused) {
+                state = awaitItem()
+            }
 
             manager.handleAction(SessionManager.ACTION_RESUME, scope = this@runTest)
             val resumed = awaitItem() as TimerState.Running
             assertFalse(resumed.isPaused)
 
+            manager.stop()
             cancelAndConsumeRemainingEvents()
         }
     }
@@ -129,11 +139,15 @@ class SessionManagerTest {
             awaitItem() // Idle
 
             manager.handleAction(SessionManager.ACTION_START, sessionId, false, this@runTest)
-            advanceUntilIdle()
+            advanceTimeBy(1)
             awaitItem() // Running
 
             manager.handleAction(SessionManager.ACTION_STOP, scope = this@runTest)
-            assertEquals(TimerState.Idle, awaitItem())
+            var state: TimerState = awaitItem()
+            while (state !is TimerState.Idle) {
+                state = awaitItem()
+            }
+            assertEquals(TimerState.Idle, state)
 
             cancelAndConsumeRemainingEvents()
         }
@@ -147,11 +161,15 @@ class SessionManagerTest {
             awaitItem() // Idle
 
             manager.handleAction(SessionManager.ACTION_START, sessionId, false, this@runTest)
-            advanceUntilIdle()
+            advanceTimeBy(1)
             awaitItem() // Running
 
             manager.stop()
-            assertEquals(TimerState.Idle, awaitItem())
+            var state: TimerState = awaitItem()
+            while (state !is TimerState.Idle) {
+                state = awaitItem()
+            }
+            assertEquals(TimerState.Idle, state)
 
             cancelAndConsumeRemainingEvents()
         }
