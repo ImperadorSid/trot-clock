@@ -96,4 +96,53 @@ class SessionListViewModelTest {
             cancelAndConsumeRemainingEvents()
         }
     }
+
+    @Test
+    fun `sessions are sorted by createdAt descending`() = runTest {
+        repository.insertSession(
+            Session(dateLabel = "01/04", patterns = emptyList(), createdAt = 1000L)
+        )
+        repository.insertSession(
+            Session(dateLabel = "02/04", patterns = emptyList(), createdAt = 2000L)
+        )
+        viewModel = SessionListViewModel(repository)
+
+        viewModel.uiState.test {
+            var state = awaitItem()
+            while (state is SessionListUiState.Loading) {
+                state = awaitItem()
+            }
+            val success = state as SessionListUiState.Success
+            assertEquals(2, success.sessions.size)
+            assertEquals("02/04", success.sessions[0].dateLabel)
+            assertEquals("01/04", success.sessions[1].dateLabel)
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `multiple sessions with patterns emit correctly`() = runTest {
+        val patterns = listOf(
+            IntervalPattern(reps = 2, walkDurationSeconds = 60, jogDurationSeconds = 90)
+        )
+        repository.insertSession(
+            Session(dateLabel = "01/04", patterns = patterns, createdAt = 1000L)
+        )
+        repository.insertSession(
+            Session(dateLabel = "02/04", patterns = patterns, createdAt = 2000L)
+        )
+        viewModel = SessionListViewModel(repository)
+
+        viewModel.uiState.test {
+            var state = awaitItem()
+            while (state is SessionListUiState.Loading) {
+                state = awaitItem()
+            }
+            val success = state as SessionListUiState.Success
+            assertEquals(2, success.sessions.size)
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
 }

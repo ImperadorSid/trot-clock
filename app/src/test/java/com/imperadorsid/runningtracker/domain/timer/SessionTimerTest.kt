@@ -235,4 +235,43 @@ class SessionTimerTest {
             cancelAndConsumeRemainingEvents()
         }
     }
+
+    @Test
+    fun `start with empty steps does not transition to Running`() = runTest {
+        timer.start(emptyList(), this)
+        advanceUntilIdle()
+        assertEquals(TimerState.Idle, timer.timerState.value)
+    }
+
+    @Test
+    fun `start cancels previous timer`() = runTest {
+        timer.timerState.test {
+            awaitItem() // Idle
+
+            timer.start(simpleSteps, this@runTest)
+            awaitItem() // Running step 0
+
+            // Start again with different steps
+            val newSteps = listOf(
+                TimerStep(2, IntervalType.JOG, TimerPhase.ACTIVE)
+            )
+            timer.start(newSteps, this@runTest)
+
+            // Should see Idle from stop, then new Running
+            var state = awaitItem()
+            while (state is TimerState.Running && state.currentStep.type == IntervalType.WALK) {
+                state = awaitItem()
+            }
+
+            if (state is TimerState.Idle) {
+                state = awaitItem()
+            }
+
+            assertTrue(state is TimerState.Running)
+            val running = state as TimerState.Running
+            assertEquals(IntervalType.JOG, running.currentStep.type)
+
+            cancelAndConsumeRemainingEvents()
+        }
+    }
 }

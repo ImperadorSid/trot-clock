@@ -172,6 +172,30 @@ push/PR → [unit-tests + lint] ──┐
 - Splash screen via `core-splashscreen` library with custom theme in `res/values/styles.xml`
 - Wear-specific Compose previews: `@WearPreviewDevices`, `@WearPreviewFontScales`
 
+### Wear OS UI Patterns
+
+- **ScreenScaffold** wraps every screen for proper Wear layout with scroll indicators
+- **SwipeDismissableNavHost** for gesture-based navigation (swipe right = back)
+- **TransformingLazyColumn** for scrollable lists with Wear-appropriate transformations
+- **SwipeToReveal** for swipe-to-delete gestures on list items
+- **EdgeButton** for primary actions (create, save) at screen edges
+- **FilledTonalButton** for secondary actions (toggle intervals-only, pause)
+- **Vibration feedback** on interval transitions (`VibrationEffect.createOneShot(500)`)
+- Version-aware vibrator access: `VibratorManager` on API 31+, legacy `VIBRATOR_SERVICE` below
+- Keep text concise — watch screens are small; use `bodySmall`/`labelMedium` for secondary info
+
+### Navigation
+
+Three routes defined in `Screen.kt`:
+
+| Route | Description | Arguments |
+|-------|-------------|-----------|
+| `session_list` | Start destination, shows saved sessions | None |
+| `create_session` | Form to create a new session with patterns | None |
+| `active_session/{sessionId}` | Timer screen for running a session | `sessionId: Long` |
+
+Navigate with: `navController.navigate(Screen.activeSession(id))` — helper function builds the route string.
+
 ## Feature Development Workflow
 
 When adding a new feature, follow this layer order:
